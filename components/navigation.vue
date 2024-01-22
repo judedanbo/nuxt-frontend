@@ -1,0 +1,53 @@
+<script lang="ts" setup>
+import type { NavItem } from '@nuxt/content/dist/runtime/types'
+const links = [
+  {
+    label: 'Home',
+    icon: 'i-heroicons-home',
+    to: '/home',
+
+  },
+  {
+    label: 'Accounting',
+    icon: 'i-heroicons-banknotes',
+    to: '/accounting'
+  }, {
+    label: 'Inventory',
+    icon: 'i-heroicons-square-3-stack-3d',
+    to: '/inventory'
+  }, {
+    label: 'Purchase Order',
+    icon: 'i-heroicons-presentation-chart-line',
+    to: '/po'
+  }, {
+    label: 'Sales Order',
+    icon: 'i-heroicons-square-3-stack-3d',
+    to: '/so'
+  },
+  {
+    label: 'Users Management',
+    icon: 'i-heroicons-users',
+    to: '/auth/',
+    children: [{
+      label: 'Users',
+      to: '/auth/users'
+    },
+    {
+      label: 'Groups',
+      to: '/auth/groups'
+    },
+    ]
+  },
+
+
+]
+
+</script>
+
+<template>
+  <UAside>
+    <UNavigationTree :links="links" default-open :multiple="false" />
+  </UAside>
+</template>
+
+<style scoped></style>
