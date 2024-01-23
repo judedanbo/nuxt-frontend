@@ -117,8 +117,8 @@ const deleteGroup = () => {
             />
           </UFormGroup>
           <UButton class="mt-20" type="submit">
-          Submit
-        </UButton>
+            Submit
+          </UButton>
         </UForm>
       </UPageCard>
     </UModal>

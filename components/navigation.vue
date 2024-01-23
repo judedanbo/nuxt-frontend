@@ -8,6 +8,20 @@ const links = [
 
   },
   {
+    label: 'Company',
+    icon: 'i-mdi-storefront-outline',
+    to: '/company',
+    children: [
+     { label: 'Departments',
+      to: '/company/departments'
+    },
+    {
+      label: 'Units',
+      to: '/company/units'
+    }
+    ]
+  },
+  {
     label: 'Accounting',
     icon: 'i-heroicons-banknotes',
     to: '/accounting'
