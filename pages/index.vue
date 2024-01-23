@@ -1,3 +1,8 @@
+<script setup lang="ts">
+definePageMeta({
+  layout: 'home'
+})
+</script>
 <template>
   <UPage>
     <ULandingHero title="Jodi ERP" description="Enterprise Resource planning (ERP) for Jodi Construction Limited">

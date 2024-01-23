@@ -28,7 +28,33 @@ const links = [
   }, {
     label: 'Inventory',
     icon: 'i-heroicons-square-3-stack-3d',
-    to: '/inventory'
+    to: '/inventory',
+    children: [
+      {
+        label: 'Products',
+        to: '/inventory/products'
+      },
+      {
+        label: 'Requisitions',
+        to: '/inventory/requisitions'
+      },
+      {
+        label: 'Brands',
+        to: '/inventory/brands'
+      },
+      {
+        label: 'Categories',
+        to: '/inventory/categories'
+      },
+      {
+        label: 'Classification',
+        to: '/inventory/classification'
+      },
+      {
+        label: 'Units of Measure',
+        to: '/inventory/units'
+      },
+    ]
   }, {
     label: 'Purchase Order',
     icon: 'i-heroicons-presentation-chart-line',
