@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 
 const config = useRuntimeConfig()
+const toast = useToast()
 const breadcrumb = [{
   label: 'Home',
   icon: 'i-heroicons-home',
@@ -10,17 +11,94 @@ const breadcrumb = [{
   icon: 'i-mdi-library-shelves',
   to: '/inventory'
 }, {
-  label: 'Product',
+  label: 'Products',
   icon: 'i-mdi-format-list-bulleted-type'
 }]
 const productsListPage = ref(1)
 const searchProduct = ref('')
 const showCreateForm = ref(false)
+const showEditForm = ref(false)
 const addProduct = () => {
   showCreateForm.value = true
 }
-const { data: products, pending, error, refresh} = useLazyFetch(config.public.API_BASE_URL +'/inventory/products/')
+const { data: products, pending, error, refresh} = useLazyFetch(config.public.API_BASE_URL +'/inventory/products/',{
+  query: {search: searchProduct},
+  watch: [searchProduct]
+})
 
+const productCreated = () => {
+  toast.add({title: 'New product has been added'})
+  showCreateForm.value = false
+  refresh()
+}
+const productUpdated = () => {
+  toast.add({title: 'Product has been updated'})
+  showEditForm.value = false
+  refresh()
+}
+const columns = [
+  {
+    key: 'name',
+    label: 'Product name'
+  },
+  {
+    key: 'brand_id',
+    label: 'Brand'
+  },
+  {
+    key: 'category_id',
+    label: 'Category'
+  },
+  {
+    key: 'unit_id',
+    label: 'unit of Measurement'
+  },
+  {
+    key: 'classification_id',
+    label: 'Product Classification'
+  },
+  {
+    key: 'restock_level',
+    label: 'Restock Level'
+  },
+  {
+    key: 'available_quantity_value',
+    label: 'Available Quantity'
+  },
+  // {
+  //   key: 'total_quantity_intake',
+  //   label: 'Total intake'
+  // },
+  // {
+  //   key: 'total_quantity_requested',
+  //   label: 'Total requested'
+  // },
+  {
+    key: 'actions',
+    label: ''
+  },
+  
+]
+const rowToEdit = ref()
+const openEditForm = (row) => {
+  rowToEdit.value = row
+  showEditForm.value = true
+}
+const action = (row) => [
+  [{
+    label: 'Edit',
+    icon: 'i-heroicons-pencil-square-20-solid',
+    click: () => openEditForm(row.id)
+  }, {
+    label: 'View',
+    icon: 'i-heroicons-document-duplicate-20-solid',
+    click: () => navigateTo('/inventory/products/' + row.id)
+  }], [{
+    label: 'Delete',
+    icon: 'i-heroicons-trash-20-solid',
+    click: () => emit('delete', row.id)
+  }]
+]
 </script>
 
 <template>
@@ -39,9 +117,60 @@ const { data: products, pending, error, refresh} = useLazyFetch(config.public.AP
       {{ error }}
     </div>
     <div v-else>
-      {{ products }}
+      <!-- {{ products }} -->
       <div class="flex flex-wrap gap-10 mt-5">
-        <UTable :rows="products.data" />
+        <UTable :rows="products.data" :columns="columns">
+          <template #name-data="{row}">
+            <nuxt-link :to="'/inventory/products/'+row.id" class="prose dark:prose-invert font-medium">
+              {{ row.name }}
+            </nuxt-link>
+          </template>
+          <template #brand_id-data="{row}">
+            <nuxt-link :to="row.brand_id?'/inventory/brands/'+row.brand_id.id:''" class="prose dark:prose-invert">
+              {{ row.brand_id?.name }}
+            </nuxt-link>
+          </template>
+          <template #category_id-data="{row}">
+            <nuxt-link :to="row.category_id?'/inventory/categories/'+row.category_id.id:''" class="prose dark:prose-invert">
+              {{ row.category_id?.name }}
+            </nuxt-link>
+          </template>
+          <template #restock_level-data="{row}">
+            <p class="prose dark:prose-invert text-right">
+              {{ row.restock_level }}
+            </p>
+          </template>
+          <template #unit_id-data="{row}">
+            <nuxt-link :to="row.unit_id?'/inventory/units/'+row.unit_id.id:''" class="prose dark:prose-invert">
+              {{ row.unit_id?.name }}
+            </nuxt-link>
+          </template>
+          <template #classification_id-data="{row}">
+            <nuxt-link :to="row.classification_id?'/inventory/classification/'+row.classification_id.id:''" class="prose dark:prose-invert">
+              {{ row.classification_id?.name }}
+            </nuxt-link>
+          </template>
+          <template #available_quantity_value-data="{row}">
+            <p class="prose dark:prose-invert text-right">
+              {{ row.product_inventory[0]?.avialable_quantity }}
+            </p>
+          </template>
+          <!-- <template #total_quantity_intake-data="{row}">
+            <p class="prose dark:prose-invert text-right">
+              {{ row.product_inventory[0]?.product_inventory_details[0]?.quantity_intake }}
+            </p>
+          </template> -->
+          <!-- <template #total_quantity_requested-data="{row}">
+            <p class="prose dark:prose-invert text-right">
+              {{ row.product_inventory[0]?.product_inventory_details[0]?.quantity_requested }}
+            </p>
+          </template> -->
+          <template #actions-data="{ row }">
+            <UDropdown :items="action(row)">
+              <UButton color="gray" variant="ghost" icon="i-heroicons-ellipsis-vertical-20-solid" />
+            </UDropdown>
+          </template>
+        </UTable>
         <UPagination v-model="productsListPage" :total="products.total_items" :ui="{ rounded: 'first-of-type:rounded-s-md last-of-type:rounded-e-md' }">
           <template #first="{ onClick }">
             <UTooltip text="First page">
@@ -57,11 +186,14 @@ const { data: products, pending, error, refresh} = useLazyFetch(config.public.AP
       </div>
     </div>
     <USlideover v-model="showCreateForm">
-      <form-shell>
-        <inventory-product-add />
+      <form-shell title="Create new Product">
+        <inventory-product-add @created="productCreated" />
+      </form-shell>
+    </USlideover>
+    <USlideover v-model="showEditForm">
+      <form-shell title="Edit Product">
+        <inventory-product-edit :product="rowToEdit" @updated="productUpdated" />
       </form-shell>
     </USlideover>
   </section>
 </template>
-
-<style scoped></style>

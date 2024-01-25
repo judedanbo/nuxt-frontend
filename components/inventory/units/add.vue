@@ -13,17 +13,18 @@ const formError = ref<FormError>({
 })
 
 const emit = defineEmits(['created'])
-//  Todo Category accepts empty product on the backend
 
-const validationErrors = ref({
-  name: [],
-  brand_id: [],
-})
-const brandsForm = ref({ name: props.value })
+const validationErrors = ref(
+  {
+    name: [],
+    brand_id: [],
+  }
+)
+const unitsForm = ref({ name: props.value })
 const handleSubmit = async () => {
-  return  useLazyFetch(config.public.API_BASE_URL +'/inventory/brands/', {
+  return  useLazyFetch(config.public.API_BASE_URL +'/inventory/units/', {
     method: 'POST',
-    body: brandsForm,
+    body: unitsForm.value,
     onRequest(){      
       formPending.value = true
     },
@@ -35,7 +36,7 @@ const handleSubmit = async () => {
       }
       formError.value.status = response.status
       formError.value.text = response.statusText
-      console.log(response)
+      // console.log(response)
       formPending.value = false
     },
     onResponse({response}){
@@ -51,18 +52,18 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <UForm :state="brandsForm" class="space-y-4 mt-10" @submit="handleSubmit">
-    <UFormGroup label="Brand Name " name="name">
-      <UInput v-model="brandsForm.name" required />
+  <UForm :state="unitsForm" class="space-y-4 mt-10" @submit="handleSubmit">
+    <UFormGroup label="Name of unit" name="name">
+      <UInput v-model="unitsForm.name" required />
       <validation-error :errors="validationErrors?.name" />
     </UFormGroup>
 
     <UButton class="mt-20" type="submit" :disabled="formPending">
-      Add Brand
+      Add Unit
     </UButton>
 
-    <div v-if="formError.status " class="text-red-400 text-xs">
-      <p>There was an error adding the category. Try again or contact your administrator with the message below </p>
+    <div v-if="formError.status" class="text-red-400 text-xs">
+      <p>There was an error adding the unit. Try again or contact your administrator with the message below </p>
       <p class="mt-2">
         Status code: {{ formError.status }}
       </p>
@@ -70,3 +71,5 @@ const handleSubmit = async () => {
     </div>
   </UForm>
 </template>
+
+<style scoped></style>

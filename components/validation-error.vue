@@ -2,9 +2,9 @@
 defineProps({
   errors: {
     type: Array,
-    required: true,
+    default: () => [],
   },
-});
+})
 </script>
 
 <template>

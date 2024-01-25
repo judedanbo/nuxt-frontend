@@ -1,6 +1,25 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
-const emit = defineEmits(['created'])
+const emit = defineEmits(['updated'])
+
+const props = defineProps({
+  product: {
+    type: Object,
+    default: () => {
+      return {
+        id: '',
+        category_id: '',
+        brand_id: '',
+        unit_id: '',
+        classification_id: '',
+        name: '',
+        restock_level: '',
+        unit_price: '',
+        quantity: '',
+      }
+    }
+  }
+})
 // add new category
 const query = ref('')
 const classificationQuery = ref('')
@@ -12,13 +31,15 @@ const addCategory = () => {
 }
 const formPending = ref(false)
 const handleSubmit = async() => {
-  return  useLazyFetch<ProductResponse>(config.public.API_BASE_URL +'/inventory/products/', {
-    method: 'POST',
+  return  useLazyFetch(config.public.API_BASE_URL +'/inventory/products/'+ props.product.id +'/', {
+    method: 'PUT',
     body: productForm,
     onRequest(){      
       formPending.value = true
     },
-    
+    onRequestError({error}){
+      // console.log(error)
+    },
     onResponseError({response}){
       if(response.status === 400){
         // console.log(response._data)
@@ -31,8 +52,8 @@ const handleSubmit = async() => {
       formPending.value = false
     },
     onResponse({response}){
-      if(response.status === 201){
-        emit('created')
+      if(response.status === 200){
+        emit('updated')
         formPending.value = false
       }
     }
@@ -40,41 +61,40 @@ const handleSubmit = async() => {
   
 }
 // categories
-const {data:category, pending: categoryPending, refresh} = useLazyFetch<CategoryResponse>(config.public.API_BASE_URL +'/inventory/categories/')
-const selectedCategory: Ref<Category|undefined> = ref()
+const {data:category, pending: categoryPending, error, refresh} = useLazyFetch(config.public.API_BASE_URL +'/inventory/categories/')
+const selectedCategory = ref(props.product.category_id ?? {})
 const selectedCategoryId = computed(() => {
-  return selectedCategory.value?.id
+  return selectedCategory.value.id
 })
 
 // add new Classification
 const showClassificationModal =  ref(false)
 
 // product classification
-const {data: classification, refresh: refreshClassification} = useLazyFetch<ClassificationResponse>(config.public.API_BASE_URL +'/inventory/classification/')
-const selectedClassification: Ref<Classification|undefined> = ref()
+const {data: classification, pending: classificationPending, error: classificationErrors, refresh: refreshClassification} = useLazyFetch(config.public.API_BASE_URL +'/inventory/classification/')
+const selectedClassification = ref(props.product.classification_id ?? {})
 const selectedClassificationId = computed(() => {
-  return selectedClassification.value?.id
+  return selectedClassification.value.id
 })
 
 // product Brand
-const {data: brands,  refresh: refreshBrands} = useLazyFetch<BrandResponse>(config.public.API_BASE_URL +'/inventory/brands/')
-const selectedBrand: Ref<Brand|undefined> = ref()
+const {data: brands, pending: brandsPending, error: brandsErrors, refresh: refreshBrands} = useLazyFetch(config.public.API_BASE_URL +'/inventory/brands/')
+const selectedBrand = ref(props.product.brand_id ?? {})
 const selectedBrandId = computed(() => {
-  return selectedBrand.value?.id
+  return selectedBrand.value.id
 })
 
 // unit of measurement
 
-const selectedUnit: Ref<Unit|undefined> = ref()
+const selectedUnit = ref(props.product.unit_id ?? {})
 const showUnitsModal = ref(false)
-const {data: units, refresh: refreshUnit} = useLazyFetch<UnitResponse>(config.public.API_BASE_URL +'/inventory/units/')
-const unitCreated = (unit: Unit) => {
-  selectedUnit.value = unit
-  showUnitsModal.value = false
+const {data: units, pending: unitsPending, error: unitsErrors, refresh: refreshUnit} = useLazyFetch(config.public.API_BASE_URL +'/inventory/units/')
+const unitCreated = () => {
+  showUnitsModal.value =false
   refreshUnit()
 }
 const selectedUnitId = computed(() => {
-  return selectedUnit.value?.id
+  return selectedUnit.value.id
 })
 
 const productForm = ref({
@@ -82,39 +102,28 @@ const productForm = ref({
   brand_id: selectedBrandId,
   unit_id: selectedUnitId,
   classification_id: selectedClassificationId,
-  name: '',
-  restock_level: '',
-  unit_price: '',
-  quantity: '',
+  name: props.product.name,
+  restock_level: props.product.restock_level,
+  unit_price: props.product.unit_price,
+  quantity: props.product.quantity,
+  
 })
-const validationErrors = ref({
-  category_id: [],
-  brand_id: [],
-  unit_id: [],
-  classification_id: [],
-  name: [],
-  restock_level: [],
-  unit_price: [],
-  quantity: [],
-})
-const formError = ref<FormError>({
-  status: undefined,
+const validationErrors = ref([])
+const formError = ref({
+  status: '',
   text: ''
 })
 
-const categoryCreated = (category: Category) => {
-  selectedCategory.value = category
+const categoryCreated = () => {
   showCategoryModal.value = false
   refresh()
 }
-const classificationCreated = (classification: Classification) => {
-  selectedClassification.value = classification
+const classificationCreated = () => {
   showClassificationModal.value = false
   refreshClassification()
 }
 const showBrandsModal = ref(false)
-const brandsCreated = (brand: Brand) => {
-  selectedBrand.value = brand
+const brandsCreated = () => {
   showBrandsModal.value = false
   refreshBrands()
 }
@@ -238,10 +247,12 @@ const brandsCreated = (brand: Brand) => {
       <UFormGroup label="Restock Level" name="restock_level">
         <UInput v-model="productForm.restock_level" type="number" />
       </UFormGroup>
-      <UFormGroup label="Unit Price" name="unit_price">
+      
+      
+      <UFormGroup v-if="props.product.unit_price" label="Unit Price" name="unit_price">
         <UInput v-model="productForm.unit_price" type="number" />
       </UFormGroup>
-      <UFormGroup label="Initial Quantity" name="quantity">
+      <UFormGroup v-if="props.product.quantity" label="Initial Quantity" name="quantity">
         <UInput v-model="productForm.quantity" type="number" />
       </UFormGroup>
       <UButton class="mt-20" type="submit">
@@ -253,7 +264,7 @@ const brandsCreated = (brand: Brand) => {
         <h2 class="text-xl">
           Create new product category
         </h2>
-        <inventory-category-add :value="query" @created="(category) => categoryCreated(category)" />
+        <inventory-category-add :value="query" @created="categoryCreated" />
       </div>
     </UModal>
     <UModal v-model="showClassificationModal">
@@ -261,7 +272,7 @@ const brandsCreated = (brand: Brand) => {
         <h2 class="text-xl">
           Create new product Classification
         </h2>
-        <inventory-classification-add :value="classificationQuery" @created="(classification) => classificationCreated(classification)" />
+        <inventory-classification-add :value="classificationQuery" @created="classificationCreated" />
       </div>
     </UModal>
     <UModal v-model="showBrandsModal">
@@ -269,7 +280,7 @@ const brandsCreated = (brand: Brand) => {
         <h2 class="text-xl">
           Create new product Brand
         </h2>
-        <inventory-brands-add :value="brandsQuery" @created="(brand) => brandsCreated(brand)" />
+        <inventory-brands-add :value="brandsQuery" @created="brandsCreated" />
       </div>
     </UModal>
     <UModal v-model="showUnitsModal">
@@ -277,7 +288,7 @@ const brandsCreated = (brand: Brand) => {
         <h2 class="text-xl">
           Create new Unit of measurement
         </h2>
-        <inventory-units-add :value="unitsQuery" @created="(unit) => unitCreated(unit)" />
+        <inventory-units-add :value="unitsQuery" @created="unitCreated" />
       </div>
     </UModal>
   </div>

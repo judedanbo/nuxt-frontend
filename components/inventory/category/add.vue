@@ -40,7 +40,7 @@ const handleSubmit = async () => {
     },
     onResponse({response}){
       if(response.status === 201){
-        emit('created')
+        emit('created', response._data)
         formPending.value = false
       }
     }

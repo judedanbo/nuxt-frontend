@@ -35,12 +35,11 @@ const handleSubmit = async () => {
       }
       formError.value.status = response.status
       formError.value.text = response.statusText
-      console.log(response)
       formPending.value = false
     },
     onResponse({response}){
       if(response.status === 201){
-        emit('created')
+        emit('created', response._data)
         formPending.value = false
       }
     }
