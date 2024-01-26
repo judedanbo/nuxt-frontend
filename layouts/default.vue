@@ -54,5 +54,3 @@ useSeoMeta({
     </UPage>
   </UContainer>
 </template>
-
-<style scoped></style>

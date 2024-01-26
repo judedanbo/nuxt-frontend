@@ -1,13 +1,3 @@
-interface Product {
-    id: number;
-    name: string;
-    restock_level: number;
-    brand_id: { id: number; name: string };
-    category_id: { id: number; name: string };
-    unit_id: { id: number; name: string };
-    classification_id: { id: number; name: string };
-}
-
 interface Response {
     links: {next: string, previous: string};
     total_pages: number;
@@ -16,15 +6,9 @@ interface Response {
     page_size: number;
     message: string;
 }
-
-interface ProductResponse {
-    Response,
-    data: Product;
-}
-
 interface Category {
-    id: number;
-    name: string;
+    id: number | undefined;
+    name: string | undefined;
 }
 
 interface CategoryResponse {
@@ -33,8 +17,8 @@ interface CategoryResponse {
 }
 
 interface Brand {
-    id: number;
-    name: string;
+    id: number | undefined;
+    name: string | undefined;
 }
 
 interface BrandResponse {
@@ -43,8 +27,8 @@ interface BrandResponse {
 }
 
 interface Unit {
-    id: number;
-    name: string;
+    id: number | undefined;
+    name: string | undefined;
 }
 
 interface UnitResponse {
@@ -53,16 +37,42 @@ interface UnitResponse {
 } 
 
 interface Classification {
-    id: number;
-    name: string;
+    id: number | undefined;
+    name: string | undefined;
 }
 
 interface ClassificationResponse {
     Response,
     data: Classification[];
 }
+
+interface ProductForm {
+    id?: number | undefined;
+    name: string | undefined;
+    restock_level: number | undefined;
+    brand_id: number | undefined;
+    category_id: number| undefined;
+    unit_id: number | undefined;
+    classification_id: number | undefined;
+}
+
+interface Product {
+    id: number;
+    name: string;
+    restock_level: number;
+    brand_id: Brand;
+    category_id: Category;
+    unit_id: Unit;
+    classification_id: Classification;
+}
+
+interface ProductResponse {
+    Response,
+    data: Product;
+}
 interface FormError{
     status: undefined | number;
     text: string;
 }
+
 

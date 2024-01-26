@@ -6,8 +6,8 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  category: {
-    type: Object as () => Category ,
+  unit: {
+    type: Object as () => Unit ,
     required: true
   }
 })
@@ -18,15 +18,15 @@ const formError = ref<FormError>({
 
 const emit = defineEmits(['updated'])
 
-const categoriesForm = ref({ id: props.category.id, name: props.category.name })
+const unitForm = ref({ id: props.unit.id, name: props.unit.name })
 const validationErrors = ref({
   name: [],
-  category_id: [],
+  unit_id: [],
 })
 const handleSubmit = async () => {
-  return  useLazyFetch(config.public.API_BASE_URL +'/inventory/categories/'+ props.category.id + '/', {
+  return  useLazyFetch(config.public.API_BASE_URL +'/inventory/units/'+ props.unit.id + '/', {
     method: 'PUT',
-    body: categoriesForm.value,
+    body: unitForm.value,
     onRequest(){
       formPending.value = true
     },
@@ -51,18 +51,18 @@ const handleSubmit = async () => {
 </script>
 <template>
   <section>
-    <UForm :state="categoriesForm" class="space-y-4 mt-10" @submit="handleSubmit">
-      <UFormGroup label="Category Name " name="name">
-        <UInput v-model="categoriesForm.name" required />
+    <UForm :state="unitForm" class="space-y-4 mt-10" @submit="handleSubmit">
+      <UFormGroup label="Unit Name " name="name">
+        <UInput v-model="unitForm.name" required />
         <validation-error :errors="validationErrors?.name" />
       </UFormGroup>
   
       <UButton class="mt-20" type="submit" :disabled="formPending">
-        Update Category
+        Update Unit
       </UButton>
   
       <div v-if="formError.status " class="text-red-400 text-xs">
-        <p>There was an error adding the category. Try again or contact your administrator with the message below </p>
+        <p>There was an error adding the unit. Try again or contact your administrator with the message below </p>
         <p class="mt-2">
           Status code: {{ formError.status }}
         </p>

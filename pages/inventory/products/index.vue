@@ -14,6 +14,8 @@ const breadcrumb = [{
   label: 'Products',
   icon: 'i-mdi-format-list-bulleted-type'
 }]
+const emit = defineEmits(['delete'])
+
 const productsListPage = ref(1)
 const searchProduct = ref('')
 const showCreateForm = ref(false)
@@ -21,7 +23,7 @@ const showEditForm = ref(false)
 const addProduct = () => {
   showCreateForm.value = true
 }
-const { data: products, pending, error, refresh} = useLazyFetch(config.public.API_BASE_URL +'/inventory/products/',{
+const { data: products, pending, error, refresh} = useLazyFetch<ProductResponse>(config.public.API_BASE_URL +'/inventory/products/',{
   query: {search: searchProduct},
   watch: [searchProduct]
 })
@@ -80,7 +82,7 @@ const columns = [
   
 ]
 const rowToEdit = ref()
-const openEditForm = (row) => {
+const openEditForm = (row: Product) => {
   rowToEdit.value = row
   showEditForm.value = true
 }
@@ -118,8 +120,8 @@ const action = (row) => [
     </div>
     <div v-else>
       <!-- {{ products }} -->
-      <div class="flex flex-wrap gap-10 mt-5">
-        <UTable :rows="products.data" :columns="columns">
+      <UPageCard class="mt-5">
+        <UTable :rows="products?.data" :columns="columns">
           <template #name-data="{row}">
             <nuxt-link :to="'/inventory/products/'+row.id" class="prose dark:prose-invert font-medium">
               {{ row.name }}
@@ -171,7 +173,7 @@ const action = (row) => [
             </UDropdown>
           </template>
         </UTable>
-        <UPagination v-model="productsListPage" :total="products.total_items" :ui="{ rounded: 'first-of-type:rounded-s-md last-of-type:rounded-e-md' }">
+        <UPagination v-model="productsListPage" :total="products?.total_items" :ui="{ rounded: 'first-of-type:rounded-s-md last-of-type:rounded-e-md' }">
           <template #first="{ onClick }">
             <UTooltip text="First page">
               <UButton icon="i-heroicons-arrow-uturn-left" color="primary" :ui="{ rounded: 'rounded-full' }" class="rtl:[&_span:first-child]:rotate-180 me-2" @click="onClick" />
@@ -183,7 +185,7 @@ const action = (row) => [
             </UTooltip>
           </template>
         </UPagination>
-      </div>
+      </UPageCard>
     </div>
     <USlideover v-model="showCreateForm">
       <form-shell title="Create new Product">

@@ -78,16 +78,12 @@ const links = [
     },
     ]
   },
-
-
 ]
 
 </script>
 
 <template>
   <UAside>
-    <UNavigationTree :links="links" default-open :multiple="false" />
+    <UNavigationTree :links="links" default-open />
   </UAside>
 </template>
-
-<style scoped></style>

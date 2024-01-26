@@ -95,7 +95,7 @@ const action = [
     //   }
     // })
   }
-const groupUpdated = () => {
+const productUpdated = () => {
   toast.add({title: 'Product has been updated'})
   showSlideover.value = false
   refresh()
@@ -289,7 +289,7 @@ const updateUnit = () => {
         <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
           Edit Product
         </h2>
-        <inventory-product-form :product="product" @updated="groupUpdated" />
+        <inventory-product-form :product="product" @updated="productUpdated" />
       </form-shell>
     </USlideover>
     <UModal v-model="showModal" :overlay="true" :close-button="true" :size="'2xl'">
